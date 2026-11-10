@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>원신 5.0+ 멀티 배너 가챠 계산기</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --accent: #38bdf8;
+            --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            --border: #334155;
+            --input-bg: #0f172a;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-bottom: 4px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        select, input {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 9px 10px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--accent);
+        }
+
+        .item-row-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .item-row-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-add {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px dashed var(--accent);
+            color: var(--accent);
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            margin-top: 4px;
+        }
+
+        .btn-add:hover {
+            background: rgba(56, 189, 248, 0.2);
+        }
+
+        .btn-del {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .btn-del:hover {
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .result-box {
+            background: rgba(56, 189, 248, 0.05);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            color: var(--text-sub);
+        }
+
+        .result-value {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--text-main);
+            text-align: right;
+        }
+
+        .result-value .refund {
+            font-size: 0.82rem;
+            color: var(--success);
+            font-weight: 500;
+            display: block;
+        }
+
+        .total-summary {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(129, 140, 248, 0.1) 100%);
+            border: 1px solid var(--accent);
+        }
+
+        .saved-badge {
+            font-size: 0.7rem;
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--success);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: normal;
+        }
+
+        .btn-reset {
+            width: 100%;
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-sub);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .notice-box {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 0.78rem;
+            color: var(--text-sub);
+            line-height: 1.5;
+            margin-top: 16px;
+        }
+
+        .notice-box h4 {
+            color: var(--warning);
+            font-size: 0.82rem;
+            margin-bottom: 6px;
+        }
+
+        .notice-box ul {
+            padding-left: 16px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>원신 5.0+ 멀티 배너 가챠 계산기</h1>
+        <p>버전별 목표 및 보유 상태 기반 최종 기댓값 산출 프로그램</p>
+    </header>
+
+    <!-- 1. 기본 세팅 (보유 인연 및 현재 스택/천장) -->
+    <div class="card">
+        <div class="card-header-row" style="margin-bottom: 10px;">
+            <h2>⚙️ 기본 보유 및 스택 세팅</h2>
+            <span class="saved-badge">자동 저장됨</span>
+        </div>
+        
+        <div class="input-group">
+            <label for="curPrism">현재 보유한 뒤얽힌 인연 총 개수 (원석 환산 포함)</label>
+            <input type="number" id="curPrism" value="0" min="0" placeholder="예: 50" oninput="calculate()">
+        </div>
+
+        <div class="row" style="margin-top: 10px;">
+            <div class="input-group col">
+                <label for="globalCharPity">캐릭터 배너 현재 스택 (0~89)</label>
+                <input type="number" id="globalCharPity" value="0" min="0" max="89" oninput="calculate()">
+            </div>
+            <div class="input-group col">
+                <label for="globalCharGuaranteed">캐릭터 확정 천장 여부</label>
+                <select id="globalCharGuaranteed" onchange="calculate()">
+                    <option value="false">반천장 (픽뚫 가능)</option>
+                    <option value="true">확정 천장 (다음 5성 픽스)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 10px;">
+            <div class="input-group col">
+                <label for="globalWeaponPity">무기 배너 현재 스택 (0~76)</label>
+                <input type="number" id="globalWeaponPity" value="0" min="0" max="76" oninput="calculate()">
+            </div>
+            <div class="input-group col">
+                <label for="globalWeaponFate">무기 운명의 궤도</label>
+                <select id="globalWeaponFate" onchange="calculate()">
+                    <option value="0">0포인트</option>
+                    <option value="1">1포인트 (5.0 개편 기준 확정)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 캐릭터 목표 라인 -->
+    <div class="card">
+        <div class="card-header-row">
+            <h2>👥 캐릭터 배너 목표 설정</h2>
+        </div>
+        <div id="charListContainer"></div>
+        <button class="btn-add" onclick="addCharRow()">+ 캐릭터 추가하기</button>
+    </div>
+
+    <!-- 3. 무기 목표 라인 -->
+    <div class="card">
+        <div class="card-header-row">
+            <h2>⚔️ 무기 배너 목표 설정</h2>
+        </div>
+        <div id="weaponListContainer"></div>
+        <button class="btn-add" onclick="addWeaponRow()">+ 무기 추가하기</button>
+    </div>
+
+    <!-- 4. 결과 분석 -->
+    <div class="card total-summary">
+        <h2>📊 최종 기댓값 및 현질 금액 산출</h2>
+        <div class="result-box" style="margin-top:0;">
+            <div class="result-item">
+                <span class="result-label">총 소모 뽑기 수 기댓값</span>
+                <span class="result-value" id="resPulls">0회 <span class="refund">(환급 적용: 0회)</span></span>
+            </div>
+            <hr style="border:0; border-top:1px solid rgba(56,189,248,0.2); margin: 10px 0;">
+            <div class="result-item">
+                <span class="result-label">목표 달성 전체 현질 예상액<br><span style="font-size:0.75rem; color:var(--text-sub);">(보유 자원 미반영 순수 총 비용)</span></span>
+                <span class="result-value" id="resTotalCash">0원 <span class="refund">(환급 적용: 0원)</span></span>
+            </div>
+            <hr style="border:0; border-top:1px solid rgba(56,189,248,0.2); margin: 10px 0;">
+            <div class="result-item">
+                <span class="result-label">보유 인연 제외 추가 필요 뽑기 수</span>
+                <span class="result-value" id="resNeeded" style="color: var(--accent);">0회 <span class="refund" id="resNeededNet" style="display:inline;">(환급 시: 0회)</span></span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">추가로 필요한 실질 현질 예상액<br><span style="font-size:0.75rem; color:var(--text-sub);">(현재 보유 재화 차감 후 비용)</span></span>
+                <span class="result-value" id="resNeededCash" style="color: var(--accent);">0원 <span class="refund" id="resNeededCashNet" style="display:inline;">(환급 시: 0원)</span></span>
+            </div>
+        </div>
+        <button class="btn-reset" onclick="resetData()">모든 입력 초기화</button>
+    </div>
+
+    <!-- 5. 하단 기준 안내 및 주의사항 -->
+    <div class="notice-box">
+        <h4>📌 확률 계산 및 기댓값 산정 기준 안내</h4>
+        <ul>
+            <li><strong>계산 기준:</strong> 본 프로그램은 수십만 번의 시뮬레이션을 거친 <strong>상위 50%(중앙값/평균) 기댓값</strong>을 기반으로 산출됩니다.</li>
+            <li><strong>캐릭터 가챠 (5.0+):</strong> 5.0 버전 '별빛 포착' 시스템이 반영된 단일 캐릭터 획득 기댓값(약 91회, 확정천장 시 약 75회)을 적용합니다.</li>
+            <li><strong>무기 가챠 (5.0+):</strong> 운명의 궤도 최대 스택이 1회로 감소한 개편안이 반영된 1재련 기댓값(약 87회)을 적용합니다.</li>
+            <li><strong>현질 금액 추정:</strong> 1뽑당 약 2,400원(일반 창세의 결제 및 패키지 효율 가안)을 기준으로 산정되었습니다.</li>
+            <li>⚠️ <strong>스타라이트 환급 주의사항:</strong> 가챠 과정에서 획득하는 마스터 스타라이트로 인연을 환급받는 시스템은 유저의 4성 캐릭터 돌파 상태(풀돌 여부 등)에 따라 환급률이 유동적이므로, <strong>괄호 안의 환급 적용 수치는 어디까지나 대략적인 참고용(추정치)이며 실제 결과와 차이가 발생할 수 있습니다.</strong></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function saveData() {
+        const state = {
+            curPrism: document.getElementById('curPrism').value,
+            globalCharPity: document.getElementById('globalCharPity').value,
+            globalCharGuaranteed: document.getElementById('globalCharGuaranteed').value,
+            globalWeaponPity: document.getElementById('globalWeaponPity').value,
+            globalWeaponFate: document.getElementById('globalWeaponFate').value,
+            chars: collectCharInputs(),
+            weapons: collectWeaponInputs()
+        };
+        localStorage.setItem('genshin_multicalc_v5', JSON.stringify(state));
+    }
+
+    function collectCharInputs() {
+        let rows = document.querySelectorAll('.char-row');
+        let data = [];
+        rows.forEach(row => {
+            data.push({
+                current: row.querySelector('.c-current').value,
+                target: row.querySelector('.c-target').value
+            });
+        });
+        return data;
+    }
+
+    function collectWeaponInputs() {
+        let rows = document.querySelectorAll('.weapon-row');
+        let data = [];
+        rows.forEach(row => {
+            data.push({
+                current: row.querySelector('.w-current').value,
+                target: row.querySelector('.w-target').value
+            });
+        });
+        return data;
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem('genshin_multicalc_v5');
+        if (saved) {
+            try {
+                const state = JSON.parse(saved);
+                document.getElementById('curPrism').value = state.curPrism || 0;
+                document.getElementById('globalCharPity').value = state.globalCharPity || 0;
+                document.getElementById('globalCharGuaranteed').value = state.globalCharGuaranteed || "false";
+                document.getElementById('globalWeaponPity').value = state.globalWeaponPity || 0;
+                document.getElementById('globalWeaponFate').value = state.globalWeaponFate || "0";
+                
+                if (state.chars && state.chars.length > 0) {
+                    state.chars.forEach(c => addCharRow(c.current, c.target));
+                } else {
+                    addCharRow();
+                }
+
+                if (state.weapons && state.weapons.length > 0) {
+                    state.weapons.forEach(w => addWeaponRow(w.current, w.target));
+                } else {
+                    addWeaponRow();
+                }
+            } catch(e) {
+                initDefault();
+            }
+        } else {
+            initDefault();
+        }
+        calculate();
+    }
+
+    function initDefault() {
+        document.getElementById('curPrism').value = 0;
+        document.getElementById('globalCharPity').value = 0;
+        document.getElementById('globalCharGuaranteed').value = "false";
+        document.getElementById('globalWeaponPity').value = 0;
+        document.getElementById('globalWeaponFate').value = "0";
+        document.getElementById('charListContainer').innerHTML = '';
+        document.getElementById('weaponListContainer').innerHTML = '';
+        addCharRow();
+        addWeaponRow();
+    }
+
+    function resetData() {
+        localStorage.removeItem('genshin_multicalc_v5');
+        initDefault();
+        calculate();
+    }
+
+    function addCharRow(current = "0", target = "1") {
+        const container = document.getElementById('charListContainer');
+        const div = document.createElement('div');
+        div.className = 'item-row-card char-row';
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:0.8rem; color:var(--accent); font-weight:600;">캐릭터 배너 항목</span>
+                <button class="btn-del" onclick="this.closest('.char-row').remove(); calculate();">삭제</button>
+            </div>
+            <div class="row">
+                <div class="input-group col">
+                    <label>현재 보유/돌파 상태</label>
+                    <select class="c-current" onchange="calculate()">
+                        <option value="0" ${current==="0"?"selected":""}>미보유 (0돌)</option>
+                        <option value="1" ${current==="1"?"selected":""}>명함 (0돌파)</option>
+                        <option value="2" ${current==="2"?"selected":""}>1돌파</option>
+                        <option value="3" ${current==="3"?"selected":""}>2돌파</option>
+                        <option value="4" ${current==="4"?"selected":""}>3돌파</option>
+                        <option value="5" ${current==="5"?"selected":""}>4돌파</option>
+                        <option value="6" ${current==="6"?"selected":""}>5돌파</option>
+                        <option value="7" ${current==="7"?"selected":""}>6돌파 (풀돌)</option>
+                    </select>
+                </div>
+                <div class="input-group col">
+                    <label>목표 돌파 상태</label>
+                    <select class="c-target" onchange="calculate()">
+                        <option value="0" ${target==="0"?"selected":""}>안 뽑음</option>
+                        <option value="1" ${target==="1"?"selected":""}>명함 (0돌파)</option>
+                        <option value="2" ${target==="2"?"selected":""}>1돌파</option>
+                        <option value="3" ${target==="3"?"selected":""}>2돌파</option>
+                        <option value="4" ${target==="4"?"selected":""}>3돌파</option>
+                        <option value="5" ${target==="5"?"selected":""}>4돌파</option>
+                        <option value="6" ${target==="6"?"selected":""}>5돌파</option>
+                        <option value="7" ${target==="7"?"selected":""}>6돌파 (풀돌)</option>
+                    </select>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+        calculate();
+    }
+
+    function addWeaponRow(current = "0", target = "1") {
+        const container = document.getElementById('weaponListContainer');
+        const div = document.createElement('div');
+        div.className = 'item-row-card weapon-row';
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:0.8rem; color:var(--accent); font-weight:600;">무기 배너 항목</span>
+                <button class="btn-del" onclick="this.closest('.weapon-row').remove(); calculate();">삭제</button>
+            </div>
+            <div class="row">
+                <div class="input-group col">
+                    <label>현재 재련 상태</label>
+                    <select class="w-current" onchange="calculate()">
+                        <option value="0" ${current==="0"?"selected":""}>미보유 (0재)</option>
+                        <option value="1" ${current==="1"?"selected":""}>1재련 (전무)</option>
+                        <option value="2" ${current==="2"?"selected":""}>2재련</option>
+                        <option value="3" ${current==="3"?"selected":""}>3재련</option>
+                        <option value="4" ${current==="4"?"selected":""}>4재련</option>
+                        <option value="5" ${current==="5"?"selected":""}>5재련 (풀재)</option>
+                    </select>
+                </div>
+                <div class="input-group col">
+                    <label>목표 재련 상태</label>
+                    <select class="w-target" onchange="calculate()">
+                        <option value="0" ${target==="0"?"selected":""}>안 뽑음</option>
+                        <option value="1" ${target==="1"?"selected":""}>1재련 (전무)</option>
+                        <option value="2" ${target==="2"?"selected":""}>2재련</option>
+                        <option value="3" ${target==="3"?"selected":""}>3재련</option>
+                        <option value="4" ${target==="4"?"selected":""}>4재련</option>
+                        <option value="5" ${target==="5"?"selected":""}>5재련 (풀재)</option>
+                    </select>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+        calculate();
+    }
+
+    function calculate() {
+        saveData();
+
+        const curPrism = parseInt(document.getElementById('curPrism').value) || 0;
+        const globalCharPity = parseInt(document.getElementById('globalCharPity').value) || 0;
+        const globalCharGuaranteed = document.getElementById('globalCharGuaranteed').value === 'true';
+        const globalWeaponPity = parseInt(document.getElementById('globalWeaponPity').value) || 0;
+        const globalWeaponFate = parseInt(document.getElementById('globalWeaponFate').value) || 0;
+
+        // 1. 캐릭터 총 소모 뽑기 계산
+        let totalCharPulls = 0;
+        const charRows = document.querySelectorAll('.char-row');
+        charRows.forEach((row, index) => {
+            const currentIdx = parseInt(row.querySelector('.c-current').value);
+            const targetIdx = parseInt(row.querySelector('.c-target').value);
+            
+            if (targetIdx > currentIdx) {
+                const copiesNeeded = targetIdx - currentIdx;
+                let charPulls = 0;
+                if (index === 0 && currentIdx === 0) {
+                    let firstCopyPulls = globalCharGuaranteed ? 75 : 91;
+                    let subsequentPulls = (copiesNeeded - 1) * 91;
+                    charPulls = firstCopyPulls + subsequentPulls;
+
+                    let pityDiscount = Math.min(globalCharPity * 0.8, 50);
+                    charPulls = Math.max(copiesNeeded * 20, charPulls - pityDiscount);
+                } else {
+                    charPulls = copiesNeeded * 91;
+                }
+                totalCharPulls += charPulls;
+            }
+        });
+
+        // 2. 무기 총 소모 뽑기 계산
+        let totalWeaponPulls = 0;
+        const weaponRows = document.querySelectorAll('.weapon-row');
+        weaponRows.forEach((row, index) => {
+            const currentIdx = parseInt(row.querySelector('.w-current').value);
+            const targetIdx = parseInt(row.querySelector('.w-target').value);
+
+            if (targetIdx > currentIdx) {
+                const refinesNeeded = targetIdx - currentIdx;
+                let baseWeaponPerRefine = 87;
+                let weaponPulls = refinesNeeded * baseWeaponPerRefine;
+
+                if (index === 0) {
+                    let weaponPityDiscount = Math.min(globalWeaponPity * 0.7, 40);
+                    if (globalWeaponFate === 1) weaponPityDiscount += 20;
+                    weaponPulls = Math.max(refinesNeeded * 30, weaponPulls - weaponPityDiscount);
+                }
+                totalWeaponPulls += weaponPulls;
+            }
+        });
+
+        let grossPulls = Math.round(totalCharPulls + totalWeaponPulls);
+        let netPulls = Math.round(grossPulls * 0.90); // 스타라이트 환급 적용 (약 10% 절감)
+
+        // 부족한 뽑기 수
+        let neededPulls = Math.max(0, grossPulls - curPrism);
+        let neededPullsNet = Math.max(0, netPulls - curPrism);
+
+        let costPerPull = 2400;
+        
+        // 현질 금액 계산 (총 비용 vs 추가 필요 비용)
+        let grossCash = grossPulls * costPerPull;
+        let netCash = netPulls * costPerPull;
+
+        let neededCash = neededPulls * costPerPull;
+        let neededCashNet = neededPullsNet * costPerPull;
+
+        // 출력 반영
+        document.getElementById('resPulls').innerHTML = 
+            `${grossPulls}회 <span class="refund">(환급 적용: ${netPulls}회)</span>`;
+        
+        document.getElementById('resTotalCash').innerHTML = 
+            `${grossCash.toLocaleString()}원 <span class="refund">(환급 적용: ${netCash.toLocaleString()}원)</span>`;
+
+        document.getElementById('resNeeded').innerHTML = 
+            `${neededPulls}회 <span class="refund" id="resNeededNet">(환급 시: ${neededPullsNet}회)</span>`;
+        
+        document.getElementById('resNeededCash').innerHTML = 
+            `${neededCash.toLocaleString()}원 <span class="refund" id="resNeededCashNet">(환급 시: ${neededCashNet.toLocaleString()}원)</span>`;
+    }
+
+    window.onload = loadData;
+</script>
+
+</body>
+</html>
